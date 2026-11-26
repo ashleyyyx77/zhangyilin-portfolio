@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>张怡琳 · 个人简历与作品集</title>
+  <meta name="description" content="成都理工大学广播电视学 张怡琳的个人简历与作品集：策划、文案、摄影、视频。">
+
+  <!-- 全站样式：顺序不能换（variables 要在 main 之前，main 才能用变量） -->
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/main.css?v=122">
+  <!-- Swiper 样式（轮播库，阶段三才用到，这里先引入） -->
+  <link rel="stylesheet" href="assets/vendor/swiper-bundle.min.css">
+  <!-- ★提前设 PLACEHOLDER_MODE：defer script 执行时 readyState='interactive'，
+       scene-config.js 的 init 会立即调用 renderHotspots()，此时 main.js（在其后加载）
+       还没执行，读不到 PLACEHOLDER_MODE。这里在内联 script 提前设，确保渲染时能读到 -->
+  <script>
+    window.Portfolio = window.Portfolio || {};
+    window.Portfolio.PLACEHOLDER_MODE = false;   // 上线：关闭占位虚框 / 物件占位标签
+    window.Portfolio.SHOW_ALL_LABELS = false;   // true=所有悬停标签常显（调试坐标用），默认 false
+  </script>
+</head>
+<body>
+  <!-- ============================================================
+       #app  整个单页应用的根容器
+       ★所有可点击物件的坐标都不在这里写——由 assets/js/scene-config.js
+         动态生成。要调位置只改 scene-config.js，不用动本文件。
+       ============================================================ -->
+  <div id="app">
+
+    <!-- ========================================================
+         顶部导航（每个场景都固定在顶部，半透明）
+         ★改品牌名：把下面「张怡琳」改成你想要的名字
+         ★改导航项：data-target 指向的 scene id 决定点击跳到哪
+         ======================================================== -->
+    <nav class="nav" aria-label="主导航">
+      <a class="nav__brand" href="#scene-1" data-target="1">张怡琳</a>
+      <ul class="nav__list">
+        <li><a class="nav__link is-active" href="#scene-1" data-target="1" aria-label="跳转到首页">首页</a></li>
+        <li><a class="nav__link" href="#scene-3" data-target="3" aria-label="跳转到作品总览">作品</a></li>
+        <li><a class="nav__link" href="#scene-10" data-target="10" aria-label="跳转到项目经历">项目</a></li>
+        <li><a class="nav__link" href="#scene-2" data-target="2" aria-label="跳转到关于我">关于</a></li>
+        <li><a class="nav__link" href="#scene-9" data-target="9" aria-label="跳转到联系我">联系</a></li>
+      </ul>
+    </nav>
+
+    <!-- ========================================================
+         音乐按钮（右上角，默认关闭）
+         为什么默认关闭：浏览器禁止无交互前自动播放音频，
+         必须等用户点击页面后才能播。所以默认关闭，用户点了再开。
+         详见 main.js 里的注释。
+         ★换音乐：把 assets/audio/bgm.mp3 换成你自己的音频文件
+         ======================================================== -->
+    <button class="music-btn" id="musicBtn" type="button" aria-label="开启或关闭背景音乐" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M9 17V5l10-2v12"></path>
+        <circle cx="6" cy="17" r="2.4"></circle>
+        <circle cx="16" cy="15" r="2.4"></circle>
+      </svg>
+    </button>
+    <audio id="bgm" src="assets/audio/bgm.mp3" preload="none" loop=""></audio>
+
+    <!-- ========================================================
+         上一屏 / 下一屏 箭头（底部两角）
+         第 1 屏隐藏「上一屏」、第 8 屏隐藏「下一屏」（JS 控制）
+         ======================================================== -->
+    <button class="scene-nav scene-nav--prev is-hidden" id="prevBtn" type="button" aria-label="返回上一屏">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 18l-6-6 6-6"></path>
+      </svg>
+    </button>
+    <button class="scene-nav scene-nav--next is-hidden" id="nextBtn" type="button" aria-label="前往下一屏">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 18l6-6-6-6"></path>
+      </svg>
+    </button>
+
+    <!-- ============================================================
+         灯箱（Lightbox）—— 点击照片看大图
+         单次创建、复用，z-index:200 高于导航(50)
+         ============================================================ -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="图片预览：第 1 张，共 18 张" style="" hidden="">
+      <div class="lightbox__overlay" data-close="1"></div>
+      <div class="lightbox__stage">
+        <button class="lightbox__close" type="button" data-close="1" aria-label="关闭灯箱">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+        <button class="lightbox__arrow lightbox__arrow--prev" type="button" data-prev="1" aria-label="上一张" disabled="">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"></path>
+          </svg>
+        </button>
+        <div class="lightbox__img-wrap">
+          <div class="lightbox__spinner" aria-hidden="true" style="display: none;"></div>
+          <img class="lightbox__img" data-no-fallback="1" alt="摄影作品" src="assets/works/photos/photo-01.jpg" style="opacity: 1; transition: opacity 320ms, transform 320ms; transform: scale(1);">
+          <div class="lightbox__error" hidden="">
+            <p>图片加载失败</p>
+            <button type="button" class="lightbox__copy" data-copy-link="">复制图片地址</button>
+          </div>
+        </div>
+        <button class="lightbox__arrow lightbox__arrow--next" type="button" data-next="1" aria-label="下一张">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18l6-6-6-6"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="lightbox__bar">
+        <span class="lightbox__count">1 / 18</span>
+        <span class="lightbox__caption" style="display: none;"></span>
+        <span class="lightbox__category" style="display: none;"></span>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         8 个场景
+         每个 .scene 一个全屏，同一时间只有 1 个带 is-active（由 scenes.js 切换）。
+         场景里的可点击物件（.hotspot）全部由 scene-config.js 在脚本加载后
+         动态插入，本 HTML 里不写坐标，方便你后期只改一个 js 文件就能调位置。
+         ======================================================== -->
+
+    <!-- 场景 1 · 封面 -->
+    <section class="scene is-active" id="scene-1" data-scene="1" data-name="封面" aria-label="场景一：封面">
+      <!-- ★必修1改：所有内容包进 .stage 16:9 舞台，坐标永远落在舞台上 -->
+      <div class="stage">
+        <div class="layer layer--bg" style="background-image: url(&quot;assets/scenes/scene-01-cover.png&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat; transform: translate3d(2.56121px, 2.74006px, 0px);"></div>
+        <div class="layer layer--mid" style="transform: translate3d(5.12241px, 5.48012px, 0px);"></div>
+        <div class="layer layer--fg" style="transform: translate3d(-8.96422px, -9.59021px, 0px);"></div>
+        <div class="scene__inner">
+          <!-- ★改主标题：把下面这句「Hi，我是张怡琳」改掉 -->
+          <!-- ★应修4改：标题/副标题/文案加 .reveal 类，让 stagger 入场动画生效 -->
+          <h1 class="cover__hi reveal is-in">Hi，我是张怡琳</h1>
+          <!-- ★改副标题：学校 / 专业 / 出生年月 -->
+          <p class="cover__meta reveal is-in">成都理工大学 · 广播电视学 · 2025.09</p>
+          <!-- ★改定位语：五个身份标签 -->
+          <p class="cover__tags reveal is-in">策划 × 文案 × 排版 × 摄影 × 视频</p>
+          <!-- ★改补充句 -->
+          <p class="cover__slogan reveal is-in">用黑白眼睛，看五彩世界</p>
+        </div>
+        <!-- 右下角手写提示（呼吸闪烁） -->
+        <span class="hint-hand reveal is-in">点击小屋，进入我的工作室</span>
+      <div class="guide-bubble" style="display: none; left: 50%; top: 50%; transform: translate(-50%, 60px);">试试点击那栋小屋</div><button type="button" class="hotspot hotspot--zone" data-id="house" aria-label="点击小屋进入工作室" data-target-scene="scene-2" style="left: 67%; top: 58%; width: 28%; height: 36%; z-index: 5;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 2 · 关于我 / 咖啡 -->
+    <section class="scene" id="scene-2" data-scene="2" data-name="关于我" aria-label="场景二：关于我">
+      <div class="stage">
+        <div class="layer layer--bg" style="background-image: url(&quot;assets/scenes/scene-02-coffee.png&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat; transform: translate3d(3.62335px, 3.32722px, 0px);"></div>
+        <div class="layer layer--mid" style="transform: translate3d(7.2467px, 6.65443px, 0px);"></div>
+        <div class="layer layer--fg" style="transform: translate3d(-12.6817px, -11.6453px, 0px);"></div>
+        <div class="scene__inner">
+          <h2 class="scene__title reveal is-in">关于我</h2>
+          <p class="scene__subtitle reveal is-in">咖啡先喝，故事后讲</p>
+        </div>
+      <div class="guide-bubble" style="display: none; left: 50%; top: 50%; transform: translate(-50%, 60px);">点一下咖啡机</div></div>
+    </section>
+
+    <!-- 场景 3 · 作品总览 / 书桌 -->
+    <section class="scene" id="scene-3" data-scene="3" data-name="作品总览" aria-label="场景三：作品总览">
+      <div class="stage">
+        <div class="layer layer--bg" style="background-image: url(&quot;assets/scenes/scene-03-desk.png&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat; transform: translate3d(-2.21469px, 1.56575px, 0px);"></div>
+        <div class="layer layer--mid" style="transform: translate3d(-4.42938px, 3.1315px, 0px);"></div>
+        <div class="layer layer--fg" style="transform: translate3d(7.75141px, -5.48012px, 0px);"></div>
+        <div class="scene__inner">
+          <h2 class="scene__title reveal is-in">作品总览</h2>
+          <p class="scene__subtitle reveal is-in">这里每一件东西，都对应我做过的一件事</p>
+        </div>
+      <div class="guide-bubble" style="left: 50%; top: 50%; transform: translate(-50%, 60px); display: none;">桌上的东西都能点</div><button type="button" class="hotspot hotspot--zone" data-id="camera" aria-label="点击相机，跳到摄影作品" data-target-scene="scene-6" style="left: 70%; top: 44%; width: 11%; height: 13%; z-index: 5;"><span class="hotspot__inner"></span></button><button type="button" class="hotspot hotspot--zone" data-id="laptop" aria-label="点击电脑，跳到视频作品" data-target-scene="scene-4" style="left: 44%; top: 37%; width: 21%; height: 25%; z-index: 5;"><span class="hotspot__inner"></span></button><button type="button" class="hotspot hotspot--zone" data-id="notebook" aria-label="点击笔记本，查看个人履历" data-target-scene="scene-7" style="left: 45%; top: 62%; width: 11%; height: 15%; z-index: 5;"><span class="hotspot__inner"></span></button><button type="button" class="hotspot hotspot--zone" data-id="books" aria-label="点击书堆，跳到排版作品" data-target-scene="scene-5" style="left: 20%; top: 57%; width: 18%; height: 20%; z-index: 5;"><span class="hotspot__inner"></span></button><button type="button" class="hotspot hotspot--zone" data-id="dessert" aria-label="点击甜品，跳到排版作品" data-target-scene="scene-8" style="left: 61%; top: 58%; width: 10%; height: 14%; z-index: 5;"><span class="hotspot__inner"></span></button><button type="button" class="hotspot hotspot--zone" data-id="lamp" aria-label="点击台灯，跳到项目经历" data-target-scene="scene-10" style="left: 34%; top: 21%; width: 12%; height: 28%; z-index: 5;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 4 · 视频作品 -->
+    <section class="scene scene--scroll" id="scene-4" data-scene="4" data-name="视频作品" aria-label="场景四：视频作品">
+      <div class="stage stage--scroll">
+        <div class="layer layer--bg"></div>
+        <div class="layer layer--mid"></div>
+        <div class="layer layer--fg"></div>
+        <div class="scene__inner scene__inner--scroll">
+          <span class="scene__eyebrow reveal is-in">SCENE 04 · VIDEO</span>
+          <h2 class="scene__title reveal is-in">视频作品</h2>
+          <p class="scene__subtitle reveal is-in">幕布亮起，故事开场</p>
+
+          <!-- 筛选按钮组（renderVideos 按 VIDEOS 实际类型动态生成，不写死） -->
+          <div class="video-filter reveal is-in" role="tablist" aria-label="视频筛选"></div>
+
+          <!-- 封面墙（renderVideos 渲染 9 张卡片） -->
+          <div id="videoWall" class="video-wall"></div>
+
+          <!-- 空状态 -->
+          <p id="videoEmpty" class="video-empty" style="display:none;">这个分类的视频还在整理中</p>
+
+          <!-- 数据亮点区 -->
+          <div class="video-stats">
+            <div class="stat-card"><span class="stat-card__num">6 部</span><span class="stat-card__label">视频作品</span></div>
+            <div class="stat-card"><span class="stat-card__num">8 分钟</span><span class="stat-card__label">作品总时长</span></div>
+            <div class="stat-card"><span class="stat-card__num">5.1w</span><span class="stat-card__label">单条最高播放量</span></div>
+            <div class="stat-card"><span class="stat-card__num">3 类</span><span class="stat-card__label">短视频 / vlog / AIGC 短片</span></div>
+          </div>
+
+          <!-- 底部小字 -->
+          <p class="video-foot">点击封面可观看完整版视频</p>
+        </div>
+      <!-- 播放器弹层预留：下一步在这里插入 iframe
+           结构：<div class="video-player" id="videoPlayer" hidden>
+                  <div class="video-player__overlay" data-close="1"></div>
+                  <div class="video-player__stage">
+                    <button class="video-player__close" data-close="1" aria-label="关闭">×</button>
+                    <iframe src="//player.bilibili.com/player.html?bvid=XXXX&autoplay=0"
+                            scrolling="no" border="0" frameborder="no" framespacing="0"
+                            allowfullscreen="true"></iframe>
+                  </div>
+                </div>
+           挂载位置：插在 #app 末尾（与灯箱同级），z-index 高于导航 -->
+      <div class="guide-bubble" style="display: none; left: 50%; top: 50%; transform: translate(-50%, 60px);">点封面播放视频</div><button type="button" class="hotspot hotspot--zone" data-id="back-to-desk" aria-label="点击中间返回作品总览" data-target-scene="scene-3" style="left: 30%; top: 30%; width: 40%; height: 40%; z-index: 1;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 5 · 文稿作品 -->
+    <section class="scene scene--scroll bg-missing" id="scene-5" data-scene="5" data-name="文稿作品" aria-label="场景五：文稿作品">
+      <div class="stage stage--scroll">
+        <div class="layer layer--bg" style="transform: translate3d(0.6629px, -0.892966px, 0px);"></div>
+        <div class="layer layer--mid" style="transform: translate3d(1.3258px, -1.78593px, 0px);"></div>
+        <div class="layer layer--fg" style="transform: translate3d(-2.32015px, 3.12538px, 0px);"></div>
+        <div class="scene__inner scene__inner--scroll">
+          <span class="scene__eyebrow reveal is-in">SCENE 05 · ARTICLE</span>
+          <h2 class="scene__title reveal is-in">文稿作品</h2>
+          <p class="scene__subtitle reveal is-in">贴在墙上的，是写过的字</p>
+
+          <!-- 筛选按钮组 -->
+          <div class="article-filter reveal is-in" role="tablist" aria-label="文稿筛选">
+            <button class="article-filter__btn" data-filter="all" type="button">全部</button>
+            <button class="article-filter__btn" data-filter="official" type="button">学校官微</button>
+            <button class="article-filter__btn is-active" data-filter="weibo" type="button">《看电影》微博</button>
+            <button class="article-filter__btn" data-filter="personal" type="button">个人公众号</button>
+          </div>
+
+          <!-- 卡片分组容器（works.js 渲染） -->
+          <div id="articlesWrap" class="articles-wrap"><div class="article-group" data-group="official"><h3 class="article-group__title">学校官方微信公众号 · 党委宣传部融媒体中心</h3><p class="article-group__desc" style="white-space: pre-line;">2025.09 至今 · 记者站部长 · 负责主题策划、新闻报道撰写、排版及封面海报设计</p><div class="article-grid" data-group="official"><a class="article-card" data-id="graphic-01" data-group="official" href="https://mp.weixin.qq.com/s/8IOHzK7JLOZykio2AljdwQ" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="成"></div><div class="article-card__body"><h4 class="article-card__title">成理学子亮相川超舞台，用拼搏诠释成理力量</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-02" data-group="official" href="https://mp.weixin.qq.com/s/eutbsbBx8Oozp9fEKoYpqA" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="时"></div><div class="article-card__body"><h4 class="article-card__title">时光镌刻校名 岁月沉淀力</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-03" data-group="official" href="https://mp.weixin.qq.com/s/4bsGkUYNmKwv9fCyH5MCig" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="执"></div><div class="article-card__body"><h4 class="article-card__title">执手偕行·情系成理</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-04" data-group="official" href="https://mp.weixin.qq.com/s/vobEkSrceMUlNEZZT0hHng" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="七"></div><div class="article-card__body"><h4 class="article-card__title">七十年·岁月声</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-05" data-group="official" href="https://mp.weixin.qq.com/s/BzaILjrMmc3B4518gkA43A" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="理"></div><div class="article-card__body"><h4 class="article-card__title">理工玫瑰，不止铿锵——记成都理工大学校园组女足队</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-06" data-group="official" href="https://mp.weixin.qq.com/s/WKOyKBG_izgT8_ueIC86WA" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="四"></div><div class="article-card__body"><h4 class="article-card__title">四分之一的幸福</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-07" data-group="official" href="https://mp.weixin.qq.com/s/9dJklcaJvJKH4KV71FKwyA" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="喜"></div><div class="article-card__body"><h4 class="article-card__title">喜讯！校长许强荣获何梁何利基金"科学与技术进步奖"</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-08" data-group="official" href="https://mp.weixin.qq.com/s/I05xMEgEwg2_q8IVslNa0g" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="这"></div><div class="article-card__body"><h4 class="article-card__title">这个春天，给你点颜色看看</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-09" data-group="official" href="https://mp.weixin.qq.com/s/UhObv1_4LyWq682h5phDEA" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="十"></div><div class="article-card__body"><h4 class="article-card__title">十佳大学生丨林晨曦：向上生长，向远而行</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-10" data-group="official" href="https://mp.weixin.qq.com/s/Dr0oog0hMOovhOsQsi6tOQ" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="七"></div><div class="article-card__body"><h4 class="article-card__title">七秩同心 温暖同行——校工会开展庆祝"三八"国际妇女节系列活动</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-11" data-group="official" href="https://mp.weixin.qq.com/s/1iucoJmdYIo_EOQKGdjsEQ" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="成"></div><div class="article-card__body"><h4 class="article-card__title">成都，我不得劲！</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-12" data-group="official" href="https://mp.weixin.qq.com/s/x08IaLLYWxHHheF0dalURg" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="成"></div><div class="article-card__body"><h4 class="article-card__title">成理花草，正等今年与你相逢在</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-13" data-group="official" href="https://mp.weixin.qq.com/s/g4cTpxKdHOvlHAWlsdIsyQ" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="7"></div><div class="article-card__body"><h4 class="article-card__title">70周年校庆文艺汇演</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-14" data-group="official" href="https://mp.weixin.qq.com/s/LeyRYgNjnywY9gc7P90YKg" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="创"></div><div class="article-card__body"><h4 class="article-card__title">创新发展论坛</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-15" data-group="official" href="https://mp.weixin.qq.com/s/msziR4m5hQsqaeqWJHuERg" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="毕"></div><div class="article-card__body"><h4 class="article-card__title">毕业典礼</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a><a class="article-card" data-id="graphic-16" data-group="official" href="https://mp.weixin.qq.com/s/IcgVeWtTEb6NUsgwvMJHhA" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="运"></div><div class="article-card__body"><h4 class="article-card__title">运动会</h4><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">学校官微</span></div></a></div></div><div class="article-sep"></div><div class="article-group" data-group="weibo"><h3 class="article-group__title">《看电影》杂志官方微博</h3><p class="article-group__desc" style="white-space: pre-line;">2026.06-09 · 峨眉电影频道 内容运营实习生 · 参与运营杂志官方微博
+基于粉丝画像与互动数据调整固定栏目，结合热点每日策划 3-5 条微博
+单条微博最高流量 13w+ · 单周涨粉 130+</p><div class="article-grid" data-group="weibo"><a class="article-card" data-id="weibo-01" data-group="weibo" href="https://weibo.com/1769684987/R7h4ZyFSS" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="tag tag--metric">单条流量 13w+</span><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-02" data-group="weibo" href="https://weibo.com/1769684987/R5LT6u7l1" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-03" data-group="weibo" href="https://weibo.com/1769684987/R8YvqxAa2" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-04" data-group="weibo" href="https://weibo.com/1769684987/R5BjQsULB" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-05" data-group="weibo" href="https://weibo.com/1769684987/R8vI7rg4x" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-06" data-group="weibo" href="https://weibo.com/1769684987/R84pIvjnD" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-07" data-group="weibo" href="https://weibo.com/1769684987/R7sfXiGMk" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-08" data-group="weibo" href="https://weibo.com/1769684987/R6Q1WldlN" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-09" data-group="weibo" href="https://weibo.com/1769684987/R6FK23nfB" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-10" data-group="weibo" href="https://weibo.com/1769684987/R6nymuzWm" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a><a class="article-card" data-id="weibo-11" data-group="weibo" href="https://weibo.com/1769684987/R64MKjOl8" target="_blank" rel="noopener noreferrer"><div class="article-card__shot is-placeholder show-dashed" data-placeholder-char="微"></div><div class="article-card__body"><span class="article-card__hint">阅读原文 · 新窗口打开 ↗</span><span class="tag tag--source">《看电影》微博</span></div></a></div></div></div>
+
+          <!-- 空状态 -->
+          <p id="articleEmpty" class="article-empty" style="display: none;">这个分类的内容还在整理中</p>
+
+          <!-- 数据亮点区 -->
+          <div class="article-stats">
+            <div class="stat-card"><span class="stat-card__num">16</span><span class="stat-card__label">学校官微推文</span></div>
+            <div class="stat-card"><span class="stat-card__num">11</span><span class="stat-card__label">《看电影》杂志微博</span></div>
+            <div class="stat-card"><span class="stat-card__num">13w+</span><span class="stat-card__label">《看电影》微博单条最高流量</span></div>
+            <div class="stat-card"><span class="stat-card__num">1.5w+</span><span class="stat-card__label">学校官微单篇最高阅读量</span></div>
+          </div>
+        </div>
+      <div class="guide-bubble" style="display: none; left: 50%; top: 50%; transform: translate(-50%, 60px);">点卡片看原文</div><button type="button" class="hotspot hotspot--zone" data-id="back-to-desk" aria-label="点击中间返回作品总览" data-target-scene="scene-3" style="left: 30%; top: 30%; width: 40%; height: 40%; z-index: 1;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 6 · 摄影作品（瀑布流照片墙，可滚动） -->
+    <section class="scene scene--scroll bg-missing" id="scene-6" data-scene="6" data-name="摄影作品" aria-label="场景六：摄影作品">
+      <div class="stage stage--scroll">
+        <div class="layer layer--bg"></div>
+        <div class="layer layer--mid"></div>
+        <div class="layer layer--fg"></div>
+        <div class="scene__inner scene__inner--scroll">
+          <span class="scene__eyebrow reveal is-in">SCENE 06 · PHOTO</span>
+          <h2 class="scene__title reveal is-in">摄影作品</h2>
+          <p class="scene__subtitle reveal is-in">29 张照片，留住看见的光</p>
+          <p class="scene__note reveal is-in">作品多次在学校内（教学楼、图书馆）展示并被相关活动官方使用</p>
+
+          <!-- 筛选按钮组 -->
+          <div class="photo-filter reveal is-in" role="tablist" aria-label="摄影筛选">
+            <button class="photo-filter__btn is-active" data-filter="all" type="button">全部</button>
+          </div>
+
+          <!-- 瀑布流照片墙（works.js 渲染） -->
+          <div id="photoWall" class="photo-wall"><button class="photo-card" type="button" data-id="photo-01" style="--tilt: 0.58deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-01" loading="lazy" data-src="assets/works/photos/thumb-01.jpg" style="opacity: 1;" src="assets/works/photos/thumb-01.jpg"></div></button><button class="photo-card" type="button" data-id="photo-02" style="--tilt: -1.23deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-02" loading="lazy" data-src="assets/works/photos/thumb-02.jpg" style="opacity: 1;" src="assets/works/photos/thumb-02.jpg"></div></button><button class="photo-card" type="button" data-id="photo-03" style="--tilt: 1.47deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-03" loading="lazy" data-src="assets/works/photos/thumb-03.jpg" style="opacity: 1;" src="assets/works/photos/thumb-03.jpg"></div></button><button class="photo-card" type="button" data-id="photo-04" style="--tilt: 0.30deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-04" loading="lazy" data-src="assets/works/photos/thumb-04.jpg" style="opacity: 1;" src="assets/works/photos/thumb-04.jpg"></div></button><button class="photo-card" type="button" data-id="photo-05" style="--tilt: 0.82deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-05" loading="lazy" data-src="assets/works/photos/thumb-05.jpg" style="opacity: 1;" src="assets/works/photos/thumb-05.jpg"></div></button><button class="photo-card" type="button" data-id="photo-06" style="--tilt: 1.10deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-06" loading="lazy" data-src="assets/works/photos/thumb-06.jpg" style="opacity: 1;" src="assets/works/photos/thumb-06.jpg"></div></button><button class="photo-card" type="button" data-id="photo-07" style="--tilt: -0.24deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-07" loading="lazy" data-src="assets/works/photos/thumb-07.jpg" style="opacity: 1;" src="assets/works/photos/thumb-07.jpg"></div></button><button class="photo-card" type="button" data-id="photo-08" style="--tilt: 1.91deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-08" loading="lazy" data-src="assets/works/photos/thumb-08.jpg" style="opacity: 1;" src="assets/works/photos/thumb-08.jpg"></div></button><button class="photo-card" type="button" data-id="photo-09" style="--tilt: 0.12deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-09" loading="lazy" data-src="assets/works/photos/thumb-09.jpg" style="opacity: 1;" src="assets/works/photos/thumb-09.jpg"></div></button><button class="photo-card" type="button" data-id="photo-10" style="--tilt: 1.87deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 2 / 3;"><img class="photo-card__img" alt="摄影作品 photo-10" loading="lazy" data-src="assets/works/photos/thumb-10.jpg" style="opacity: 1;" src="assets/works/photos/thumb-10.jpg"></div></button><button class="photo-card" type="button" data-id="photo-11" style="--tilt: 1.00deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-11" loading="lazy" data-src="assets/works/photos/thumb-11.jpg" style="opacity: 1;" src="assets/works/photos/thumb-11.jpg"></div></button><button class="photo-card" type="button" data-id="photo-12" style="--tilt: -1.39deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-12" loading="lazy" data-src="assets/works/photos/thumb-12.jpg" style="opacity: 1;" src="assets/works/photos/thumb-12.jpg"></div></button><button class="photo-card" type="button" data-id="photo-13" style="--tilt: -1.36deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-13" loading="lazy" data-src="assets/works/photos/thumb-13.jpg" style="opacity: 1;" src="assets/works/photos/thumb-13.jpg"></div></button><button class="photo-card" type="button" data-id="photo-14" style="--tilt: 1.86deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-14" loading="lazy" data-src="assets/works/photos/thumb-14.jpg" style="opacity: 1;" src="assets/works/photos/thumb-14.jpg"></div></button><button class="photo-card" type="button" data-id="photo-15" style="--tilt: -1.05deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-15" loading="lazy" data-src="assets/works/photos/thumb-15.jpg" style="opacity: 1;" src="assets/works/photos/thumb-15.jpg"></div></button><button class="photo-card" type="button" data-id="photo-16" style="--tilt: -0.22deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-16" loading="lazy" data-src="assets/works/photos/thumb-16.jpg" style="opacity: 1;" src="assets/works/photos/thumb-16.jpg"></div></button><button class="photo-card" type="button" data-id="photo-17" style="--tilt: 0.28deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 3 / 4;"><img class="photo-card__img" alt="摄影作品 photo-17" loading="lazy" data-src="assets/works/photos/thumb-17.jpg" style="opacity: 1;" src="assets/works/photos/thumb-17.jpg"></div></button><button class="photo-card" type="button" data-id="photo-18" style="--tilt: -0.40deg;"><div class="photo-card__frame is-loaded" style="aspect-ratio: 4 / 3;"><img class="photo-card__img" alt="摄影作品 photo-18" loading="lazy" data-src="assets/works/photos/thumb-18.jpg" style="opacity: 1;" src="assets/works/photos/thumb-18.jpg"></div></button></div>
+
+          <!-- 空状态 -->
+          <p id="photoEmpty" class="photo-empty" style="display:none;">这个分类的照片还在整理中</p>
+        </div>
+      <div class="guide-bubble" style="left: 50%; top: 50%; transform: translate(-50%, 60px); display: none;">点照片看大图</div><button type="button" class="hotspot hotspot--zone" data-id="back-to-desk" aria-label="点击中间返回作品总览" data-target-scene="scene-3" style="left: 30%; top: 30%; width: 40%; height: 40%; z-index: 1;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 7 · 技能履历 / 档案柜 -->
+    <section class="scene" id="scene-7" data-scene="7" data-name="技能履历" aria-label="场景七：技能履历">
+      <div class="stage">
+        <div class="layer layer--bg" style="background-image: url(&quot;assets/scenes/scene-07-internship-v2.jpg&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat; transform: translate3d(-0.233522px, -0.0733944px, 0px);"></div>
+        <div class="layer layer--mid" style="transform: translate3d(-0.467043px, -0.146789px, 0px);"></div>
+        <div class="layer layer--fg" style="transform: translate3d(0.817326px, 0.256881px, 0px);"></div>
+        <div class="scene__inner"></div>
+      <div class="guide-bubble" style="display: none; left: 50%; top: 50%; transform: translate(-50%, 60px);">切换上面的标签页</div><button type="button" class="hotspot hotspot--zone" data-id="back-to-desk" aria-label="点击中间返回作品总览" data-target-scene="scene-3" style="left: 30%; top: 30%; width: 40%; height: 40%; z-index: 1;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 8 · 排版作品 -->
+    <section class="scene" id="scene-8" data-scene="8" data-name="排版作品" aria-label="场景八：排版作品">
+      <div class="stage">
+        <div class="layer layer--bg" style="background-image: url(&quot;assets/scenes/scene-08-layout-v2.jpg&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat; transform: translate3d(0.12806px, -0.183486px, 0px);"></div>
+        <div class="layer layer--mid" style="transform: translate3d(0.256121px, -0.366972px, 0px);"></div>
+        <div class="layer layer--fg" style="transform: translate3d(-0.448211px, 0.642202px, 0px);"></div>
+        <div class="scene__inner" style="justify-content: flex-end; padding-bottom: 10%;"></div>
+      <div class="guide-bubble" style="display: none; left: 50%; top: 50%; transform: translate(-50%, 60px);">排版作品集</div><button type="button" class="hotspot hotspot--zone" data-id="back-to-desk" aria-label="点击中间返回作品总览" data-target-scene="scene-3" style="left: 30%; top: 30%; width: 40%; height: 40%; z-index: 1;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 10 · 项目经历 -->
+    <section class="scene" id="scene-10" data-scene="10" data-name="项目经历" aria-label="场景十：项目经历">
+      <div class="stage">
+        <div class="layer layer--bg" style="background-image: url(&quot;assets/scenes/scene-10-project-v3.png&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
+        <div class="layer layer--mid"></div>
+        <div class="layer layer--fg"></div>
+        <div class="scene__inner"></div>
+      <div class="guide-bubble" style="display: none; left: 50%; top: 50%; transform: translate(-50%, 60px);">点中央返回书桌</div><button type="button" class="hotspot hotspot--zone" data-id="back-to-desk" aria-label="点击中间返回作品总览" data-target-scene="scene-3" style="left: 30%; top: 30%; width: 40%; height: 40%; z-index: 1;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+    <!-- 场景 9 · 联系我 / 黄昏邮筒 -->
+    <section class="scene" id="scene-9" data-scene="9" data-name="联系我" aria-label="场景九：联系我">
+      <div class="stage">
+        <div class="layer layer--bg" style="background-image: url(&quot;assets/scenes/scene-09-contact.png&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat; transform: translate3d(-3.53698px, 3.5107px, 0px);"></div>
+        <div class="layer layer--mid" style="transform: translate3d(-7.07395px, 7.02141px, 0px);"></div>
+        <div class="layer layer--fg" style="transform: translate3d(12.3794px, -12.2875px, 0px);"></div>
+        <div class="scene__inner" style="justify-content: flex-start; padding-top: 12%;">
+          <h2 class="scene__title reveal is-in">联系我</h2>
+        </div>
+      <button type="button" class="hotspot" data-id="back-home" aria-label="回到首页" data-target-scene="scene-1" style="left: 12%; top: 82%; width: auto; z-index: 4;"><span class="hotspot__inner"></span></button><button type="button" class="hotspot hotspot--zone" data-id="back-to-desk" aria-label="点击中间返回作品总览" data-target-scene="scene-3" style="left: 30%; top: 30%; width: 40%; height: 40%; z-index: 1;"><span class="hotspot__inner"></span></button></div>
+    </section>
+
+  </div>
+
+  <!-- ============================================================
+       脚本：顺序很重要
+       1) 三方库先加载（本地引用，离线可用）
+       2) 业务脚本按依赖顺序加载，全部用 defer 异步执行
+       改逻辑请看对应 js 文件，每个文件顶部有说明。
+       （GSAP / ScrollTrigger 的 vendor 文件保留在 assets/vendor/，
+        阶段四需要复杂滚动联动动效时再加 <script> 引用）
+       ============================================================ -->
+  <script src="assets/vendor/swiper-bundle.min.js?v=105" defer=""></script>
+
+  <script src="assets/js/scenes.js?v=114" defer=""></script>
+  <script src="assets/js/scene-config.js?v=127" defer=""></script>
+  <script src="assets/js/parallax.js?v=111" defer=""></script>
+  <script src="assets/js/works.js?v=137" defer=""></script>
+  <script src="assets/js/main.js?v=113" defer=""></script>
+
+
+
+
+
+</body></html>
